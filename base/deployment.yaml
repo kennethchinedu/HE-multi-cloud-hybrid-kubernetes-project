@@ -474,20 +474,16 @@ metadata:
     dev: currencyservice
     team: devops
   spec:
-  selector:
-    matchLabels:
-      app: currency-app
-  replicas: 1
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-  template:
-    metadata:
-      labels:
+    selector:
+      matchLabels:
         app: currency-app
     spec:
+      replicas: 1
+      strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: 25%
+          maxUnavailable: 25%
         #      # nodeSelector:
         #      #   node: worker
       imagePullSecrets:

@@ -9,7 +9,7 @@ spec:
   project: boutique
 
   source:
-    repoURL: https://github.com/kennethchinedu/HA-multi-cloud-k8s-project.git
+    repoURL: https://github.com/kennethchinedu/HE-multi-cloud-hybrid-kubernetes-project
     targetRevision: main
     path: base/
 
