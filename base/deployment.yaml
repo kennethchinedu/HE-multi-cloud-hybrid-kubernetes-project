@@ -473,32 +473,37 @@ metadata:
     app: currency-app
     dev: currencyservice
     team: devops
-  spec:
-    selector:
-      matchLabels:
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: currency-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
         app: currency-app
     spec:
-      replicas: 1
-      strategy:
-        type: RollingUpdate
-        rollingUpdate:
-          maxSurge: 25%
-          maxUnavailable: 25%
-        #      # nodeSelector:
-        #      #   node: worker
       imagePullSecrets:
         - name: reposecret
       containers:
         - name: currency-app
           image: anamskenneth/currencyservice:2025-07-24
           imagePullPolicy: IfNotPresent
+
           # resources:
-            # requests:
-              # memory: "64Mi"
-              # cpu: "50m"
-            # limits:
-              # memory: "256Mi"
-              # cpu: "300m"
+          #   requests:
+          #     cpu: "50m"
+          #     memory: "64Mi"
+          #   limits:
+          #     cpu: "300m"
+          #     memory: "256Mi"
           env:
             - name: PORT
               value: "7000"
@@ -519,13 +524,6 @@ metadata:
               port: 7000
             initialDelaySeconds: 10
             periodSeconds: 5
-          # tolerations:
-          #   - key: "workload"
-          #     operator: "Equal"
-          #     value: "general"
-          #     effect: "NoSchedule"
-          # nodeSelector:
-          #   workload: general
           volumeMounts:
             - name: localvolume
               mountPath: /etc/localdev

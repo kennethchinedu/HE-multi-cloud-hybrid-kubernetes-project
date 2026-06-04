@@ -9,7 +9,7 @@ spec:
   description: Online Boutique microservices application
 
   sourceRepos:
-    - https://github.com/kennethchinedu/HA-multi-cloud-k8s-project.git
+    - https://github.com/kennethchinedu/HE-multi-cloud-hybrid-kubernetes-project
 
   destinations:
     - namespace: default
