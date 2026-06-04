@@ -1,0 +1,109 @@
+---
+# 1. Block workloads that request more CPU than the allowed maximum per container
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: limit-cpu-requests
+  annotations:
+    policies.kyverno.io/title: Limit CPU Requests
+    policies.kyverno.io/category: Cost
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Oversized CPU requests prevent the scheduler from packing pods
+      efficiently, leaving nodes underutilised and driving up costs.
+      Each container is capped at 500m CPU request and 1 core limit.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: check-cpu-request
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "CPU request must not exceed 500m and CPU limit must not exceed 1000m (1 core) per container."
+        foreach:
+          - list: "request.object.spec.containers"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.resources.requests.cpu || '0' }}"
+                    operator: GreaterThan
+                    value: "500m"
+                  - key: "{{ element.resources.limits.cpu || '0' }}"
+                    operator: GreaterThan
+                    value: "1000m"
+
+---
+# 2. Block workloads that request more memory than the allowed maximum per container
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: limit-memory-requests
+  annotations:
+    policies.kyverno.io/title: Limit Memory Requests
+    policies.kyverno.io/category: Cost
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Excessive memory requests reserve capacity that may never be used,
+      reducing node utilisation. Each container is capped at 256Mi
+      request and 512Mi limit to keep the learning cluster healthy.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: check-memory-request
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Memory request must not exceed 256Mi and memory limit must not exceed 512Mi per container."
+        foreach:
+          - list: "request.object.spec.containers"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ element.resources.requests.memory || '0' }}"
+                    operator: GreaterThan
+                    value: "256Mi"
+                  - key: "{{ element.resources.limits.memory || '0' }}"
+                    operator: GreaterThan
+                    value: "512Mi"
+
+---
+# 3. Require HPA on every Deployment — prevents idle over-provisioning by scaling down when not needed
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-hpa
+  annotations:
+    policies.kyverno.io/title: Require Horizontal Pod Autoscaler
+    policies.kyverno.io/category: Cost
+    policies.kyverno.io/severity: low
+    policies.kyverno.io/description: >-
+      Running a fixed replica count at peak capacity wastes resources
+      during low-traffic periods. All Deployments must have a
+      corresponding HPA so replicas scale down when load drops.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: check-hpa-exists
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+      validate:
+        message: "Every Deployment must have a HorizontalPodAutoscaler targeting it."
+        deny:
+          conditions:
+            all:
+              - key: "{{ request.object.metadata.name }}"
+                operator: AnyNotIn
+                value: "{{ request.object.metadata.annotations.\"autoscaling.knative.dev/class\" || '' }}"
+

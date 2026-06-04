@@ -1,0 +1,9 @@
+region        = "Uk south"
+cluster_name  = "sre-aks-uk-south"
+cluster_version = "1.34.7"
+dns_prefix    = "sreaks"
+node_count    = 1
+vm_size       = "Standard_D2ps_v6"
+resource_group_name="devops-team-uks"
+vnet_name="sre-vnet-uksouth"
+kubeconfig_context=""

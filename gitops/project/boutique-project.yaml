@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: boutique
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Online Boutique microservices application
+
+  sourceRepos:
+    - https://github.com/kennethchinedu/HA-multi-cloud-k8s-project.git
+
+  destinations:
+    - namespace: default
+      server: https://kubernetes.default.svc
+
+  namespaceResourceWhitelist:
+    - group: apps
+      kind: Deployment
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: Secret
+    - group: ""
+      kind: ConfigMap
+    - group: ""
+      kind: PersistentVolumeClaim
+
+  roles:
+    - name: boutique-admin
+      description: Full access to boutique project
+      policies:
+        - p, proj:boutique:boutique-admin, applications, *, boutique/*, allow

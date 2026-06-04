@@ -1,0 +1,81 @@
+---
+# 1. Require liveness and readiness probes on all containers in the default namespace
+apiVersion: kyverno.io/v1
+kind: Policy
+metadata:
+  name: require-probes
+  namespace: default
+  annotations:
+    policies.kyverno.io/title: Require Liveness and Readiness Probes
+    policies.kyverno.io/category: Reliability
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Without probes, Kubernetes cannot detect unhealthy containers or
+      hold traffic until a container is ready. Both livenessProbe and
+      readinessProbe must be defined on every container.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: check-liveness-probe
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "All containers must define a livenessProbe."
+        pattern:
+          spec:
+            containers:
+              - (name): "*"
+                livenessProbe:
+                  (tcpSocket | httpGet | exec): "?*"
+    - name: check-readiness-probe
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "All containers must define a readinessProbe."
+        pattern:
+          spec:
+            containers:
+              - (name): "*"
+                readinessProbe:
+                  (tcpSocket | httpGet | exec): "?*"
+
+
+---
+# 3. Require a securityContext to be defined at the pod level
+apiVersion: kyverno.io/v1
+kind: Policy
+metadata:
+  name: require-pod-security-context
+  namespace: default
+  annotations:
+    policies.kyverno.io/title: Require Pod Security Context
+    policies.kyverno.io/category: Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      A pod-level securityContext sets a security baseline for all
+      containers in the pod. Requiring it ensures teams consciously
+      define the security posture of their workloads rather than
+      relying on insecure defaults.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: check-pod-security-context
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Pods must define a securityContext at the pod level."
+        pattern:
+          spec:
+            securityContext:
+              (runAsNonRoot | runAsUser | fsGroup): "?*"

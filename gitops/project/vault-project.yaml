@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: vault
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: HashiCorp Vault secrets management
+
+  sourceRepos:
+    - https://github.com/kennethchinedu/HA-multi-cloud-k8s-project.git
+    - https://helm.releases.hashicorp.com
+
+  destinations:
+    - namespace: vault
+      server: https://kubernetes.default.svc
+
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: ClusterRole
+    - group: "*"
+      kind: ClusterRoleBinding
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+
+  roles:
+    - name: vault-admin
+      description: Full access to vault project
+      policies:
+        - p, proj:vault:vault-admin, applications, *, vault/*, allow

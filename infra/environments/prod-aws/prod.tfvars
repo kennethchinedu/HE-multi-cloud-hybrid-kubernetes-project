@@ -1,0 +1,2 @@
+
+kubeconfig_context = "minikube"

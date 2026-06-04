@@ -1,0 +1,89 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: sre-multi-region-appset
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements:
+                # - region: uk-south
+                #   cluster: sre-aks-uk-south
+                #   label: prod-uk
+                # - region: australia-east
+                #   cluster: sre-aks-australia-east
+                #   label: prod-austr
+                - region: local
+                  cluster: minikube 
+                  label: staging
+
+          - list:
+              elements:
+                - app: boutique
+                  project: boutique
+                  path: base
+                  namespace: default
+                  helm: "false"
+                  serverSideApply: "false"
+                - app: kyverno-policies
+                  project: kyverno
+                  path: policies/
+                  namespace: default
+                  helm: "false"
+                  serverSideApply: "true"
+                # - app: vault
+                #   project: vault
+                #   path: platform/vault
+                #   namespace: vault
+                #   helm: "true"
+                #   serverSideApply: "true"
+
+  template:
+    metadata:
+      name: '{{.app}}-{{.region}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: '{{.project}}'
+
+      source:
+        repoURL: https://github.com/kennethchinedu/HA-multi-cloud-k8s-project.git
+        targetRevision: main
+        path: '{{.path}}'
+
+      destination:
+        name: '{{.cluster}}'
+        namespace: '{{.namespace}}'
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+        retry:
+          limit: 3
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 2m
+
+  templatePatch: |
+    spec:
+      {{- if eq .helm "true" }}
+      source:
+        helm:
+          valueFiles:
+            - values.yaml
+      {{- end }}
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          {{- if eq .serverSideApply "true" }}
+          - ServerSideApply=true
+          {{- end }}

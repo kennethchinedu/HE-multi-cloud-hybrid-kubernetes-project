@@ -1,0 +1,104 @@
+---
+# 1. Inject default resource limits if a container is missing them
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: add-default-resource-limits
+  annotations:
+    policies.kyverno.io/title: Add Default Resource Limits
+    policies.kyverno.io/category: Mutations
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Containers submitted without resource limits get safe defaults
+      injected automatically. This prevents BestEffort QoS pods from
+      consuming unbounded node resources without blocking the deployment.
+spec:
+  rules:
+    - name: inject-resource-limits
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      mutate:
+        foreach:
+          - list: "request.object.spec.containers"
+            patchStrategicMerge:
+              spec:
+                containers:
+                  - name: "{{ element.name }}"
+                    resources:
+                      requests:
+                        +(memory): "64Mi"
+                        +(cpu): "50m"
+                      limits:
+                        +(memory): "256Mi"
+                        +(cpu): "300m"
+
+---
+# 2. Add default labels to every Pod if they are missing
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: add-default-labels
+  annotations:
+    policies.kyverno.io/title: Add Default Labels
+    policies.kyverno.io/category: Mutations
+    policies.kyverno.io/severity: low
+    policies.kyverno.io/description: >-
+      Pods missing standard labels get them injected automatically.
+      Consistent labels enable cost attribution, policy targeting,
+      and network policy selectors to work without developer overhead.
+spec:
+  rules:
+    - name: inject-default-labels
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            labels:
+              +(environment): "production"
+              +(managed-by): "kyverno"
+
+---
+# 3. Inject a security context on pods that are missing one
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: add-default-security-context
+  annotations:
+    policies.kyverno.io/title: Add Default Security Context
+    policies.kyverno.io/category: Mutations
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/description: >-
+      Pods submitted without a securityContext get safe defaults injected
+      automatically. This ensures containers run as non-root and have
+      a read-only root filesystem without requiring every developer
+      to remember to set these fields.
+spec:
+  rules:
+    - name: inject-security-context
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      mutate:
+        patchStrategicMerge:
+          spec:
+            +(securityContext):
+              runAsNonRoot: true
+              runAsUser: 1000
+              fsGroup: 2000
+            containers:
+              - name: "*"
+                +(securityContext):
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
