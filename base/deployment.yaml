@@ -23,8 +23,8 @@ spec:
     spec:
         #      # nodeSelector:
         #      #   node: worker
-      imagePullSecrets:
-        - name: reposecret
+      # imagePullSecrets:
+      #   - name: reposecret
       containers:
         - name: frontend
           image: anamskenneth/frontend:2025-07-24
@@ -108,8 +108,8 @@ spec:
     spec:
         #      # nodeSelector:
         #      #   node: worker
-      imagePullSecrets:
-        - name: reposecret
+      # imagePullSecrets:
+      #   - name: reposecret
       containers:
         - name: product-catalog
           image: anamskenneth/productcatalogservice:2025-07-24
@@ -179,8 +179,8 @@ spec:
     spec:
         #      # nodeSelector:
         #      #   node: worker
-      imagePullSecrets:
-        - name: reposecret
+          # imagePullSecrets:
+          #   - name: reposecret
       containers:
         - name: cartservice
           image: anamskenneth/cartservice:2025-07-24
@@ -321,9 +321,9 @@ spec:
         app: checkout-app
     spec:
         #      # nodeSelector:
-        #      #   node: worker
-      imagePullSecrets:
-        - name: reposecret
+      #   #      #   node: worker
+      # imagePullSecrets:
+      #   - name: reposecret
       containers:
         - name: checkout
           image: anamskenneth/checkoutservice:2025-07-24
@@ -416,8 +416,8 @@ spec:
     spec:
         #      # nodeSelector:
         #      #   node: worker
-      imagePullSecrets:
-        - name: reposecret
+      # imagePullSecrets:
+      #   - name: reposecret
       containers:
         - name: recommendationservice
           image: anamskenneth/recommendationservice:2025-07-24
@@ -490,8 +490,8 @@ spec:
       labels:
         app: currency-app
     spec:
-      imagePullSecrets:
-        - name: reposecret
+      # imagePullSecrets:
+      #   - name: reposecret
       containers:
         - name: currency-app
           image: anamskenneth/currencyservice:2025-07-24
@@ -559,8 +559,8 @@ spec:
     spec:
         #      # nodeSelector:
         #      #   node: worker
-      imagePullSecrets:
-        - name: reposecret
+      # imagePullSecrets:
+      #   - name: reposecret
       containers:
         - name: ads-app
           image: anamskenneth/adservice:2025-07-24
@@ -630,8 +630,8 @@ spec:
     spec:
         #      # nodeSelector:
         #      #   node: worker
-      imagePullSecrets:
-        - name: reposecret
+      # imagePullSecrets:
+      #   - name: reposecret
       containers:
         - name: shipping-app
           image: anamskenneth/shippingservice:2025-07-24
@@ -700,9 +700,9 @@ spec:
         app: payment-app
     spec:
         #      # nodeSelector:
-        #      #   node: worker
-      imagePullSecrets:
-        - name: reposecret
+      #   #      #   node: worker
+      # imagePullSecrets:
+      #   - name: reposecret
       containers:
         - name: paymentservice
           image: anamskenneth/paymentservice:2025-07-24
@@ -766,8 +766,8 @@ spec:
     spec:
         #      # nodeSelector:
         #      #   node: worker
-      imagePullSecrets:
-        - name: reposecret
+      # imagePullSecrets:
+      #   - name: reposecret
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000

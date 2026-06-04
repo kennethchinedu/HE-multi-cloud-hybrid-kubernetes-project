@@ -77,11 +77,7 @@ setup-monitoring:
 	kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f - && \
 	helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
 		--namespace monitoring \
-		--create-namespace && \
-	# helm upgrade --install loki grafana/loki \
-  	#    --namespace monitoring \
-  	#    --set loki.storage.type=filesystem
-
+		--create-namespace 
 
 install-policy-reporter:
 	helm repo add policy-reporter https://kyverno.github.io/policy-reporter || true && \
@@ -99,8 +95,8 @@ install-platform: install-argocd set-up-monitoring install-policy-reporter
 
 # Policies for k8s
 
-# setup-policies:
-# 	kubectl apply -f policies/security/ -f policies/cost/ -f policies/mutations/
+setup-policies:
+	kubectl apply -f policies/security/ -f policies/cost/ -f policies/mutations/
 
 #  Application Deployment 
 deploy-application:

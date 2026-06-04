@@ -3,6 +3,7 @@ kind: ApplicationSet
 metadata:
   name: sre-multi-region-appset
   namespace: argocd
+
 spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
@@ -12,15 +13,16 @@ spec:
         generators:
           - list:
               elements:
+                - region: local
+                  cluster: minikube
+                  label: staging
                 # - region: uk-south
                 #   cluster: sre-aks-uk-south
-                #   label: prod-uk
-                # - region: australia-east
-                #   cluster: sre-aks-australia-east
-                #   label: prod-austr
-                - region: local
-                  cluster: minikube 
-                  label: staging
+                #   label: production
+                # - region: australia
+                #   cluster: sre-aks-uk-north
+                #   label: production
+                
 
           - list:
               elements:
@@ -30,31 +32,32 @@ spec:
                   namespace: default
                   helm: "false"
                   serverSideApply: "false"
+
                 - app: kyverno-policies
                   project: kyverno
-                  path: policies/
+                  path: platform/policies/
                   namespace: default
                   helm: "false"
                   serverSideApply: "true"
-                # - app: vault
-                #   project: vault
-                #   path: platform/vault
-                #   namespace: vault
-                #   helm: "true"
-                #   serverSideApply: "true"
 
   template:
     metadata:
       name: '{{.app}}-{{.region}}'
       finalizers:
         - resources-finalizer.argocd.argoproj.io
+
     spec:
       project: '{{.project}}'
 
       source:
-        repoURL: https://github.com/kennethchinedu/HA-multi-cloud-k8s-project.git
+        repoURL: https://github.com/kennethchinedu/HE-multi-cloud-hybrid-kubernetes-project
         targetRevision: main
         path: '{{.path}}'
+        # {{- if eq .helm "true" }}
+        # helm:
+        #   valueFiles:
+        #     - values.yaml
+        # {{- end }}
 
       destination:
         name: '{{.cluster}}'
@@ -66,24 +69,12 @@ spec:
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
+          # {{- if eq .serverSideApply "true" }}
+          # - ServerSideApply=true
+          # {{- end }}
         retry:
           limit: 3
           backoff:
             duration: 10s
             factor: 2
             maxDuration: 2m
-
-  templatePatch: |
-    spec:
-      {{- if eq .helm "true" }}
-      source:
-        helm:
-          valueFiles:
-            - values.yaml
-      {{- end }}
-      syncPolicy:
-        syncOptions:
-          - CreateNamespace=true
-          {{- if eq .serverSideApply "true" }}
-          - ServerSideApply=true
-          {{- end }}
