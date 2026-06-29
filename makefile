@@ -113,3 +113,4 @@ deploy-application:
 
 # deploy-all: deploy-gitops-platform deploy-vault deploy-application
 # 	@echo "All ArgoCD apps deployed."
+ 
