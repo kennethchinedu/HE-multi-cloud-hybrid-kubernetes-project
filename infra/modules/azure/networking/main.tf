@@ -72,3 +72,6 @@ resource "azurerm_subnet_network_security_group_association" "sre-subnet-user-ns
   subnet_id = azurerm_subnet.sre-subnet-user.id
   network_security_group_id = azurerm_network_security_group.sre-nsg.id
 }
+   
+
+   
