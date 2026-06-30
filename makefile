@@ -107,10 +107,11 @@ deploy-application:
 # 	kubectl apply -f gitops/project/kyverno-project.yaml && \
 # 	kubectl apply -f gitops/apps/platform/kyverno-app.yaml
 
-# deploy-vault:
+# deploy-vault:az 
 # 	kubectl apply -f gitops/project/vault-project.yaml && \
 	kubectl apply -f gitops/apps/platform/vault-app.yaml
 
 # deploy-all: deploy-gitops-platform deploy-vault deploy-application
 # 	@echo "All ArgoCD apps deployed."
+ 
  
