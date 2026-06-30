@@ -24,7 +24,7 @@ resource "azurerm_subnet" "sre-subnet-user" {
   address_prefixes = var.aks_subnet_user
 }
 
-resource "azurerm_network_security_group" "sre-nsg" {
+resource "azurerm_network_security_group" "sre-nsg" { 
   name = "sre-nsg"
   location = var.region
   resource_group_name = azurerm_resource_group.sre-networking-rg.name
